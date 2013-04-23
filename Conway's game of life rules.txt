@@ -1,0 +1,8 @@
+2D array
+
+Rules:
+
+1. LC < 2 neighbors dies
+2. LC 2 or 3 neighbors lives
+3. LC > 3 neighbors dies
+4. LC with exactly 3 live neighbors is born
