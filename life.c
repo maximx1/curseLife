@@ -5,7 +5,7 @@
 #include<unistd.h>
 #include<time.h>
 
-#define MAX 40
+#define MAX 200
 #define MAXTHREADS 2
 
 typedef char * string;
