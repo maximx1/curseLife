@@ -5,7 +5,7 @@
 #include<unistd.h>
 #include<time.h>
 
-#define MAX 200
+#define MAX 70
 #define MAXTHREADS 2
 
 typedef char * string;
@@ -64,8 +64,8 @@ void run(int numbersOn)
 
 	srand(time(NULL));
 
-	int ranx = rand() % (MAX - 4) + 4;
-	int rany = rand() % (MAX - 4) + 4;
+	int ranx = rand() % (MAX);
+	int rany = rand() % (MAX);
 
 	for(i = 0; i < MAX; i++)
 	{
@@ -80,9 +80,16 @@ void run(int numbersOn)
 	{
 		arr1[rany][ranx] = 1;
 		ranx = rand() % (MAX - 4) + 4;
-		rany = rand() % (MAX - 4) + 4;
-		
+		rany = rand() % (MAX - 4) + 4;	
 	}
+
+//This is for making a glider
+//	arr1[0][1] = 1;
+//	arr1[1][2] = 1;
+//	arr1[2][0] = 1;
+//	arr1[2][1] = 1;
+//	arr1[2][2] = 1;
+
 	print(arr1, numbersOn);
 
 	//Split up the data into multiple threads.
@@ -240,7 +247,7 @@ void print(int **buf, int numbersOn)
 		printw("\n");
 	}
 	refresh();
-	sleep(1);
+	usleep(100000);
 }
 
 //Initializes the ncurses screen
