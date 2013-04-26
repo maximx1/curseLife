@@ -19,12 +19,6 @@ typedef struct _colony
 	int end;
 } colony;
 
-//National Geographic video tapes
-typedef struct _natgeo
-{
-	int **scrnBuf;
-} natgeo;
-
 //Settings
 int row, col, numbersOn, MAXTHREADS, wait;
 int presetDesigns[MAXPRESETS];
@@ -141,9 +135,6 @@ void runLife()
 	colonies = (colony *)malloc(sizeof(colony) * MAXTHREADS);	//Adds an extra thread for the screen buffer.
 	pthread_t *thread;
 	thread = (pthread_t *)malloc(sizeof(pthread_t) * MAXTHREADS);
-	
-	//Struct housing the array for the screen buffer.
-	natgeo vid;
 
 	//Initialize the array to 0
 	for(i = 0; i < row; i++)
@@ -177,9 +168,6 @@ void runLife()
 		}
 	}
 
-	//Apply the screen buffer to the struct.
-	vid.scrnBuf = scrnBuf;
-
 	//Split up the data into multiple threads.
 	int split = row / (MAXTHREADS - 1);
 	for(i = 1; i < MAXTHREADS; i++)
@@ -204,7 +192,7 @@ void runLife()
 		}
 	
 		//Start the display thread.
-		pthread_create(&thread[0], NULL, print, &vid);
+		pthread_create(&thread[0], NULL, print, scrnBuf);
 
 		//Start the 2 computing threads.
 		for(i = 1; i < MAXTHREADS; i++)
@@ -326,9 +314,8 @@ int sj(int i)
 //Prints out everything in the array
 void *print(void *inBuf)
 {
-//printw("MADEIT\n");
-//refresh();
-	natgeo *buf = (natgeo*)inBuf;
+	//natgeo *buf = (natgeo*)inBuf;
+	int **buf = (int **)inBuf;
 	clear();
 	int i;
 	int j;
@@ -337,12 +324,12 @@ void *print(void *inBuf)
 	{
 		for(j = 0; j < col; j++)
 		{
-			if(buf->scrnBuf[i][j] == 1)
+			if(buf[i][j] == 1)
 			{
 				attron(COLOR_PAIR(1));
 				if(numbersOn)
 				{
-					printw("%d", buf->scrnBuf[i][j]);
+					printw("%d", buf[i][j]);
 				}
 				else
 				{
@@ -354,7 +341,7 @@ void *print(void *inBuf)
 			{
 				if(numbersOn)
 				{
-					printw("%d", buf->scrnBuf[i][j]);
+					printw("%d", buf[i][j]);
 				}
 				else
 				{
