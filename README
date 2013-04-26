@@ -6,12 +6,12 @@ Program starts out with a random seed unless the user specifies a template.
 
 Command line arguments:
 	
-	--thread [threads]	Set how many threads to process the buffer with (default 2)
+	--thread [threads]   Set how many threads to process the buffer with (default 2)
 	
-	-t [Refresh time]		Set the minimum refresh time (in milliseconds)  (default 200ms)
+	-t [Refresh time]    Set the minimum refresh time in milliseconds    (default 200ms)
 
-	-g							Set the preloaded seed for glider					(default random)
+	-g                   Set the preloaded seed for glider               (default random)
 
-	-n							Shows the underlying array
+	-n                   Shows the underlying array
 
-	-i [iterations			Set the max number of generations to iterate		(default 1000)
+	-i [iterations]      Set the max number of generations to iterate    (default 1000)

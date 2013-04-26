@@ -84,6 +84,19 @@ int main(int args, string argv[])
 			{
 				presetDesigns[0] = 1;
 			}
+
+			if(strcmp("-h", argv[i]) == 0)
+			{
+				printf("----Help----\n");
+				printf("Flags available to use:\n");
+				printf("--threads [threads]   Set number of threads to process the buffer with (default 2)\n");
+				printf("-t [refresh time]     Set the minimum refresh time in milliseconds (default 200ms)\n");
+				printf("-g                    Set the preloaded seed for the glider\n");
+				printf("-n                    Display the underlying array\n");
+				printf("-i [iterations]       Set the max number of generations to iterate (default 1000)\n");
+
+				exit(0);
+			}
 		}
 	}
 	init_screen();
