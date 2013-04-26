@@ -2,7 +2,16 @@ Conway's Game of Life as written by Justin Walrath <walrathjaw@gmail.com>
 
 If you don't know what this is: http://en.wikipedia.org/wiki/Conway's_Game_of_Life
 
-Program starts out with a random seed unless the user specifies a template.
+Preload templates:
+	Program starts out with a random seed unless the user specifies a template.
+	Templates can be loaded by adding opening a matrix file, usually with a file extension ".lif"
+Sample ".lif" file (Creates R-pentomino):
+0,0,0,0,0
+0,0,1,1,0
+0,1,1,0,0
+0,0,1,0,0
+0,0,0,0,0
+
 
 Command line arguments:
 	
