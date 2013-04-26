@@ -2,10 +2,12 @@ Conway's Game of Life as written by Justin Walrath <walrathjaw@gmail.com>
 
 If you don't know what this is: http://en.wikipedia.org/wiki/Conway's_Game_of_Life
 
+Program starts out with a random seed unless the user specifies a template.
+
 Command line arguments:
 	
-	--thread [threads]	Set how many threads to process the buffer with
+	--thread [threads]	Set how many threads to process the buffer with (default 2)
 	
-	-t [Refresh time]		Set the minimum refresh time (in milliseconds)
+	-t [Refresh time]		Set the minimum refresh time (in milliseconds)  (default 200ms)
 
-	-g							Set the preloaded seed for glider
+	-g							Set the preloaded seed for glider					(default random)
