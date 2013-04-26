@@ -20,12 +20,14 @@ typedef struct _colony
 } colony;
 
 //Settings
-int row, col, numbersOn, MAXTHREADS, wait, generations;
+int row, col, numbersOn, MAXTHREADS, wait, generations, loadFromFile;
 int presetDesigns[MAXPRESETS];
+string filename;
 
 void runLife();
 void init_screen();
 void kill_screen();
+void loadFile(int **buf);
 int ai(int i);
 int si(int i);
 int aj(int i);
@@ -42,6 +44,7 @@ int main(int args, string argv[])
 	MAXTHREADS = 2;
 	wait = 200000;
 	generations = 1000;
+	loadFromFile = 0;
 
 	for(i = 0; i < MAXPRESETS; i++)
 	{
@@ -76,6 +79,14 @@ int main(int args, string argv[])
 			if(strcmp("-i", argv[i]) == 0)
 			{
 				generations = atoi((char *)argv[++i]);
+				continue;
+			}
+
+			//Command line argument to read the file to open
+			if(strcmp("-f", argv[i]) == 0)
+			{
+				filename = argv[++i];
+				loadFromFile = 1;
 				continue;
 			}
 			
@@ -166,7 +177,11 @@ void runLife()
 		}
 	}
 
-	if(presetDesigns[0])
+	if(loadFromFile)
+	{
+		loadFile(arr1);
+	}
+	else if(presetDesigns[0])
 	{
 		//This is for making a glider that runs from {0,0} to {row,row}
 		arr1[0][1] = 1;
@@ -375,7 +390,7 @@ void *print(void *inBuf)
 	refresh();
 }
 
-//Initializes the ncurses screen
+//Initializes the ncurses screen.
 void init_screen()
 {
 	initscr();
@@ -386,9 +401,55 @@ void init_screen()
 	init_pair(1, COLOR_BLACK, COLOR_GREEN);
 }
 
-//Closes up all the ncurses resources
+//Closes up all the ncurses resources.
 void kill_screen()
 {
 	getchar();
 	endwin();
+}
+
+//Loads the matrix from the file.
+void loadFile(int **buf)
+{
+	int i = 0;	//Keep track of the rows
+	int j = 0;	//Keep track of the columns
+
+	//Open the file
+	FILE* fp;
+	fp = fopen(filename, "r");
+	string input;
+	input = (string)malloc(sizeof(char) * 2001);
+
+	while(fgets(input, 2000, fp) != NULL)
+	{
+		char* pch;
+		pch = strtok(input, ",");
+		j = 0;
+
+		//If we are at the bottom line.
+		if(i == row)
+		{
+			continue;
+		}
+
+		while(pch != NULL)
+		{
+			//If we are at the most right column.
+			if(j == col)
+			{
+				continue;
+			}
+
+			buf[i][j] = atoi(pch);
+			pch = strtok(NULL, ",");
+
+			//Go to the next column.
+			j++;
+		}	
+
+		//Go to the next row.
+		i++;
+	}
+
+	fclose(fp);
 }
