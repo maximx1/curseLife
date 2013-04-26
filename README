@@ -1,0 +1,11 @@
+Conway's Game of Life as written by Justin Walrath <walrathjaw@gmail.com>
+
+If you don't know what this is: http://en.wikipedia.org/wiki/Conway's_Game_of_Life
+
+Command line arguments:
+	
+	--thread [threads]	Set how many threads to process the buffer with
+	
+	-t [Refresh time]		Set the minimum refresh time (in milliseconds)
+
+	-g							Set the preloaded seed for glider

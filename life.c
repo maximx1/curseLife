@@ -5,7 +5,6 @@
 #include<unistd.h>
 #include<time.h>
 
-#define wait 150000
 #define MAXPRESETS 1
 
 //Makes strings easier to understand
@@ -20,12 +19,17 @@ typedef struct _colony
 	int end;
 } colony;
 
+//National Geographic video tapes
+typedef struct _natgeo
+{
+	int **scrnBuf;
+} natgeo;
+
 //Settings
-int row, col, numbersOn, MAXTHREADS;
+int row, col, numbersOn, MAXTHREADS, wait;
 int presetDesigns[MAXPRESETS];
 
 void runLife();
-void print(int **buf);
 void init_screen();
 void kill_screen();
 int ai(int i);
@@ -35,12 +39,14 @@ int sj(int i);
 
 //Thread function
 void *calcNextGen(void *th);
+void *print(void *buf);
 
 int main(int args, string argv[])
 {
 	int i = 0;
 	row = col = numbersOn = 0;
 	MAXTHREADS = 2;
+	wait = 200000;
 
 	for(i = 0; i < MAXPRESETS; i++)
 	{
@@ -58,10 +64,16 @@ int main(int args, string argv[])
 			}
 
 			//Read number of threads from the command line.
-			if(strcmp("-t", argv[i]) == 0 || strcmp("--threads", argv[i]) == 0)
+			if(strcmp("--threads", argv[i]) == 0)
 			{
 				MAXTHREADS = atoi((char *)argv[++i]);
-				printf("%s\n", argv[i]);
+				continue;
+			}
+
+			//Read the number of milliseconds refresh rate from the command line.
+			if(strcmp("-t", argv[i]) == 0)
+			{
+				wait = atoi((char *)argv[++i]) * 1000;
 				continue;
 			}
 			
@@ -88,8 +100,9 @@ void runLife()
 	getmaxyx(stdscr, row, col);
 
 	//Cut off the edge to make things run infinitely.
-	--row;
-	printw("Row: %d, Col: %d", --row, --col);
+	row -= 2;
+	col--;
+	printw("Row: %d, Col: %d", row, col);
 	refresh();
 	sleep(2);
 
@@ -98,30 +111,46 @@ void runLife()
 	{
 		MAXTHREADS = row / 2;
 	}
+	else if(MAXTHREADS < 1)
+	{
+		MAXTHREADS = 1;
+	}
+
+	if(wait < 1000)
+	{
+		wait = 1000;
+	}
 
 	//Initiate rows
 	int **arr1 = (int **)malloc(sizeof(int *) * row);	//Create 2 arrays of arrays that represent rows
 	int **arr2 = (int **)malloc(sizeof(int *) * row);
+	int **scrnBuf = (int **)malloc(sizeof(int *) * row);
 
 	//Initiate columns
 	for(i = 0; i < row; i++)
 	{
-		arr1[i] = (int *)malloc(sizeof(int) * col);		//Create columns per each row 
-		arr2[i] = (int *)malloc(sizeof(int) * col);		//Create columns per each row 
+		//Create an empty array of arrays
+		arr1[i] = (int *)malloc(sizeof(int) * col);		//For the new generation
+		arr2[i] = (int *)malloc(sizeof(int) * col);		//For the old generation
+		scrnBuf[i] = (int *)malloc(sizeof(int) * col);	//For the generation to display on the screen.
 	}
 
-	//default 2 threads but the user can change it.
+	//default 2 processor threads + display thread but the user can change it. Thread 0 is display
+	MAXTHREADS++;
 	colony *colonies;
-	colonies = (colony *)malloc(sizeof(colony) * MAXTHREADS);
+	colonies = (colony *)malloc(sizeof(colony) * MAXTHREADS);	//Adds an extra thread for the screen buffer.
 	pthread_t *thread;
 	thread = (pthread_t *)malloc(sizeof(pthread_t) * MAXTHREADS);
+	
+	//Struct housing the array for the screen buffer.
+	natgeo vid;
 
 	//Initialize the array to 0
 	for(i = 0; i < row; i++)
 	{
 		for(j = 0; j < col; j++)
 		{
-			arr1[i][j] = arr2[i][j] = 0;
+			arr1[i][j] = arr2[i][j] = scrnBuf[i][j] = 0;
 		}
 	}
 
@@ -148,46 +177,46 @@ void runLife()
 		}
 	}
 
-	//Print the base 
-	print(arr1);
+	//Apply the screen buffer to the struct.
+	vid.scrnBuf = scrnBuf;
 
 	//Split up the data into multiple threads.
-	int split = row / MAXTHREADS;
-	for(i = 0; i < MAXTHREADS; i++)
+	int split = row / (MAXTHREADS - 1);
+	for(i = 1; i < MAXTHREADS; i++)
 	{
 		colonies[i].arr1 = arr1;
 		colonies[i].arr2 = arr2;
-		colonies[i].start = i * split;
-		colonies[i].end = (i + 1) * split;
+		colonies[i].start = (i - 1) * split;
+		colonies[i].end = (i) * split;
 	}
 
 	//The main game loop
 	int gameLife;
-	for(gameLife = 0; gameLife <1000; gameLife++)
+	for(gameLife = 0; gameLife < 1000; gameLife++)
 	{
-		//Copy old array over to the storage array.
+		//Copy new array over to the storage array and the screen buffer array.
 		for(i = 0; i < row; i++)
 		{
 			for(j = 0; j < col; j++)
 			{
-				arr2[i][j] = arr1[i][j];
+				arr2[i][j] = scrnBuf[i][j] = arr1[i][j];
 			}
 		}
 	
-		//Start the 2 threads
-		for(i = 0; i < MAXTHREADS; i++)
+		//Start the display thread.
+		pthread_create(&thread[0], NULL, print, &vid);
+
+		//Start the 2 computing threads.
+		for(i = 1; i < MAXTHREADS; i++)
 		{
 			pthread_create(&thread[i], NULL, calcNextGen, &colonies[i]);
 		}
 
-		//Close the 2 threads
+		//Close all of the threads.
 		for(i = 0; i < MAXTHREADS; i++)
 		{
 			pthread_join(thread[i], NULL);
 		}
-
-		//Print out the generation
-		print(arr1);
 	}
 }
 
@@ -249,6 +278,7 @@ void *calcNextGen(void *th)
 			}
 		}
 	}
+	usleep(wait);
 }
 
 //Handles calculating the row's bottom and top edges
@@ -294,8 +324,11 @@ int sj(int i)
 }
 
 //Prints out everything in the array
-void print(int **buf)
+void *print(void *inBuf)
 {
+//printw("MADEIT\n");
+//refresh();
+	natgeo *buf = (natgeo*)inBuf;
 	clear();
 	int i;
 	int j;
@@ -304,12 +337,12 @@ void print(int **buf)
 	{
 		for(j = 0; j < col; j++)
 		{
-			if(buf[i][j] == 1)
+			if(buf->scrnBuf[i][j] == 1)
 			{
 				attron(COLOR_PAIR(1));
 				if(numbersOn)
 				{
-					printw("%d", buf[i][j]);
+					printw("%d", buf->scrnBuf[i][j]);
 				}
 				else
 				{
@@ -321,7 +354,7 @@ void print(int **buf)
 			{
 				if(numbersOn)
 				{
-					printw("%d", buf[i][j]);
+					printw("%d", buf->scrnBuf[i][j]);
 				}
 				else
 				{
@@ -332,7 +365,6 @@ void print(int **buf)
 		printw("\n\r");
 	}
 	refresh();
-	usleep(wait);
 }
 
 //Initializes the ncurses screen
