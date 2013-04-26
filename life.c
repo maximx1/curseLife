@@ -4,6 +4,7 @@
 #include<pthread.h>
 #include<unistd.h>
 #include<time.h>
+#include<string.h>
 
 #define MAXPRESETS 1
 
@@ -102,9 +103,10 @@ int main(int args, string argv[])
 				printf("Flags available to use:\n");
 				printf("--threads [threads]   Set number of threads to process the buffer with (default 2)\n");
 				printf("-t [refresh time]     Set the minimum refresh time in milliseconds (default 200ms)\n");
-				printf("-g                    Set the preloaded seed for the glider\n");
 				printf("-n                    Display the underlying array\n");
 				printf("-i [iterations]       Set the max number of generations to iterate (default 1000)\n");
+				printf("-g                    Set the preloaded seed for the glider\n");
+				printf("-f [.lif file]        Set to load seed from passed in file\n");
 
 				exit(0);
 			}
