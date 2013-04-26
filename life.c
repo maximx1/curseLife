@@ -20,7 +20,7 @@ typedef struct _colony
 } colony;
 
 //Settings
-int row, col, numbersOn, MAXTHREADS, wait;
+int row, col, numbersOn, MAXTHREADS, wait, generations;
 int presetDesigns[MAXPRESETS];
 
 void runLife();
@@ -41,6 +41,7 @@ int main(int args, string argv[])
 	row = col = numbersOn = 0;
 	MAXTHREADS = 2;
 	wait = 200000;
+	generations = 1000;
 
 	for(i = 0; i < MAXPRESETS; i++)
 	{
@@ -64,10 +65,17 @@ int main(int args, string argv[])
 				continue;
 			}
 
-			//Read the number of milliseconds refresh rate from the command line.
+			//Read the time in milliseconds refresh rate from the command line.
 			if(strcmp("-t", argv[i]) == 0)
 			{
 				wait = atoi((char *)argv[++i]) * 1000;
+				continue;
+			}
+
+			//Read the number of iterations from the command line.
+			if(strcmp("-i", argv[i]) == 0)
+			{
+				generations = atoi((char *)argv[++i]);
 				continue;
 			}
 			
@@ -180,7 +188,7 @@ void runLife()
 
 	//The main game loop
 	int gameLife;
-	for(gameLife = 0; gameLife < 1000; gameLife++)
+	for(gameLife = 0; gameLife < generations; gameLife++)
 	{
 		//Copy new array over to the storage array and the screen buffer array.
 		for(i = 0; i < row; i++)

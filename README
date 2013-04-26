@@ -11,3 +11,7 @@ Command line arguments:
 	-t [Refresh time]		Set the minimum refresh time (in milliseconds)  (default 200ms)
 
 	-g							Set the preloaded seed for glider					(default random)
+
+	-n							Shows the underlying array
+
+	-i [iterations			Set the max number of generations to iterate		(default 1000)
