@@ -354,7 +354,7 @@ void *print(void *inBuf)
 {
 	//natgeo *buf = (natgeo*)inBuf;
 	int **buf = (int **)inBuf;
-	clear();
+	move(0,0);							//Move to the upper left cell.
 	int i;
 	int j;
 
